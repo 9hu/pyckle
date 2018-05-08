@@ -1,14 +1,24 @@
 #!/usr/bin/env python3
 
+
 import os, sys, configparser, subprocess
 from tempfile import TemporaryFile
+
 
 def error (reasons):
     print("error")
     for r in reasons:
         print(r)
     print("exiting")
-    sys.exit(0)  
+    sys.exit(0) 
+
+    
+def page_error (reasons):
+    print("error")
+    for r in reasons:
+        print("\t"+r)
+    return
+
 
 def parse_config ():
     print("checking config.ini... ", end = '')
@@ -36,6 +46,7 @@ def parse_config ():
     print("done")
     return conf
 
+
 def find_markdown (root):
     print("finding markdown files... ", end = '')
     md = []
@@ -46,28 +57,40 @@ def find_markdown (root):
     print("done")
     return md
 
+
 def generate_website (f, conf):
-    if os.path.isfile(conf['site'] + f + ".html"):
+    html_file = conf['site'] + f + ".html"
+    if os.path.isfile(html_file):
         print("updating ", end = '')
     else:
         print("creating ", end = '')
     print ("website.com" + f + ".html... ", end = '')
 
-    md_file, tags = parse_markdown(conf['matter'] + f + ".md")
-    # check tags in template
+    md_file, tag = parse_markdown(conf['matter'] + f + ".md")
+
+    if tag['layout']:
+        layout = conf['layouts'] + "/" + tag['layout']
+        if os.path.isfile(layout):
+           print("correct layout syntax")
+           # layout_tags = find_tags(layout)
+    # else:
+        # just build the markdown
+
+    # remove html page
     # build page
 
     print("done")
 
+
 def parse_markdown (markdown_file):
     md_file = TemporaryFile()
     md = open(markdown_file,"r")
-    tags = {}
+    tag = {}
     for ln in md:
         if ln.startswith("@"):
             try:
                 i = ln[1:-1].split(': ')
-                tags[i[0]] = i[1]
+                tag[i[0]] = i[1]
             except:
                 error(["\""+i[0]+"\" variable in "+markdown_file+" formatted incorrectly"])
         else:
@@ -75,7 +98,8 @@ def parse_markdown (markdown_file):
 
     #tags = infer_tags(md_file, tags)
 
-    return md_file, tags
+    return md_file, tag
+
 
 def main ():
     conf = parse_config()
@@ -83,6 +107,7 @@ def main ():
     for f in files:
         generate_website(f, conf)
     print("finished successfully")
+
 
 if __name__ == "__main__":
     main()
