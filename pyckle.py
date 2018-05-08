@@ -22,7 +22,7 @@ def parse_config ():
     if 'default' not in config:
         error(["[default] section missing from config.ini"])
 
-    keys = ['layouts', 'public', 'markdowns', 'domain']
+    keys = ['layouts', 'site', 'matter', 'domain']
     for key in keys:
         if key not in config['default']:
             missing.append("\"%s\" key missing from config.ini" % key)
@@ -47,13 +47,13 @@ def find_markdown (root):
     return md
 
 def generate_website (f, conf):
-    if os.path.isfile(conf['public'] + f + ".html"):
+    if os.path.isfile(conf['site'] + f + ".html"):
         print("updating ", end = '')
     else:
         print("creating ", end = '')
     print ("website.com" + f + ".html... ", end = '')
 
-    md_file, tags = parse_markdown(conf['markdowns'] + f + ".md")
+    md_file, tags = parse_markdown(conf['matter'] + f + ".md")
     # check tags in template
     # build page
 
@@ -79,7 +79,7 @@ def parse_markdown (markdown_file):
 
 def main ():
     conf = parse_config()
-    files = find_markdown(conf['markdowns'])
+    files = find_markdown(conf['matter'])
     for f in files:
         generate_website(f, conf)
     print("finished successfully")
